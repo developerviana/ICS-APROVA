@@ -1,0 +1,144 @@
+<po-loading-overlay *ngIf="isLoading"></po-loading-overlay>
+
+<po-container class="po-md-12 po-mb-2">
+  <po-widget p-title="Filtros de Pesquisa" class="po-mb-2">
+    <div class="po-row po-align-items-center">
+
+      <!-- Buscar por Documento, Fornecedor ou Observação -->
+      <div class="po-md-3 po-sm-12">
+        <po-input
+          p-label="Buscar por Pedido, Fornecedor ou Observação"
+          p-placeholder="Digite aqui..."
+          [formControl]="filtroControl">
+        </po-input>
+      </div>
+
+      <!-- Centro de Custo ou Item Contábil -->
+      <div class="po-md-3 po-sm-12">
+        <po-input
+          p-label="Buscar por Centro de Custo ou Item Contábil"
+          p-placeholder="Digite aqui..."
+          [formControl]="filtroCustoConta">
+        </po-input>
+      </div>
+
+      <!-- Status -->
+      <div class="po-md-2 po-sm-12">
+        <po-select
+          p-label="Status"
+          [formControl]="statusControl"
+          [p-options]="[
+            { label: 'Todos', value: 'todos' },
+            { label: 'Aprovados', value: 'L' },
+            { label: 'Rejeitado', value: 'R' },
+            { label: 'Em Aprovação', value: 'F' }
+          ]">
+        </po-select>
+      </div>
+
+      <!-- Tipo -->
+      <div class="po-md-2 po-sm-12">
+        <po-select
+          p-label="Tipo"
+          [formControl]="tipoControl"
+          [p-options]="[
+            { label: 'Todos', value: 'todos' },
+            { label: 'Pedido', value: 'PEDIDO' },
+            { label: 'Medição', value: 'MEDICAO' }
+          ]">
+        </po-select>
+      </div>
+
+      <!-- Período de Emissão -->
+      <div class="po-md-2 po-sm-12">
+        <po-datepicker-range
+          p-label="Período de Emissão"
+          [formControl]="dateRangeControl">
+        </po-datepicker-range>
+      </div>
+    </div>
+
+    <!-- Linha separada para o menu suspenso de ações -->
+    <div class="po-md-12 po-text-right po-mt-md-2">
+      <po-dropdown
+        p-label="Ações"
+        p-icon="po-icon-more"
+        [p-actions]="dropdownActions"
+        p-type="icon">
+      </po-dropdown>
+    </div>
+
+  </po-widget>
+</po-container>
+
+<!-- CONTEÚDO DA PÁGINA -->
+<po-page-list
+  p-title="Itens para Aprovação"
+  [p-actions]="actions">
+
+  <po-table
+    [p-items]="itens"
+    [p-columns]="columns"
+    [p-striped]="true"
+    [p-sort]="true"
+    [p-selectable]="true"
+    [p-hide-columns-manager]="true"
+    (p-row-click)="abrirDetalhes($event)">
+  </po-table>
+
+  <!-- MENSAGEM DE NENHUM RESULTADO -->
+  <div *ngIf="!isLoading && itens.length === 0" class="po-text-center po-mt-4">
+    <p>Nenhum resultado encontrado para o filtro atual.</p>
+  </div>
+
+  <!-- BOTÃO CARREGAR MAIS -->
+  <po-button
+    *ngIf="hasMore && itens.length > 0"
+    p-label="Carregar mais"
+    (p-click)="loadMore()"
+    class="po-mt-2">
+  </po-button>
+</po-page-list>
+
+<po-modal
+  #modalRejeitar
+  p-title="Motivo da Rejeição"
+  [p-primary-action]="confirmarRejeicaoAction"
+  [p-secondary-action]="cancelarRejeicaoAction">
+
+  <p class="po-font-text-bold po-mb-2">
+    Produto: {{ itemParaRejeitar?.produto }} - {{ itemParaRejeitar?.descricao }}
+  </p>
+  <p class="po-font-text-bold po-mb-2">
+    C. Custo: {{ itemParaRejeitar?.cc }} - {{ itemParaRejeitar?.centroc }}
+  </p>
+  <p class="po-font-text-bold po-mb-2">
+    Item Cta: {{ itemParaRejeitar?.item }} - {{ itemParaRejeitar?.itemcta }}
+  </p>
+  <p class="po-font-text-bold po-mb-2">
+    Observação: {{ itemParaRejeitar?.observacao }}
+  </p>
+
+  <po-textarea
+    p-label="Motivo"
+    name="motivoRejeicao"
+    [(ngModel)]="motivoRejeicao"
+    [p-rows]="5"
+    p-placeholder="Descreva o motivo da rejeição"
+    p-auto-focus>
+  </po-textarea>
+
+</po-modal>
+
+<!-- Botão "Sair" no rodapé (visível só no mobile) -->
+<div class="po-visible-sm po-text-center po-mt-3">
+  <po-button
+    p-kind="tertiary"
+    p-label="Sair"
+    p-icon="po-icon-exit"
+    (p-click)="logoff()">
+  </po-button>
+</div>
+
+<span *ngIf="isProtheusEmbedded" class="po-text-bold po-mb-2 po-block">Bem-vindo, {{ user?.nome || user?.user_name }}</span>
+
